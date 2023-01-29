@@ -11,6 +11,21 @@ public class Element
     [NonSerialized] public static string[] ActorTypes = Array.Empty<string>();
     [NonSerialized] public static string[] ComparisonTypes = Array.Empty<string>();
 
+    [NonSerialized]
+    public Dictionary<int, string> ObjectTypeOptions = new Dictionary<int, string>
+    {
+        {0, "Any"},
+        {1, "Hostile NPC"}
+    };
+
+    [NonSerialized]
+    public Dictionary<int, string> InCombatOptions = new Dictionary<int, string>
+    {
+        {0, "Any"},
+        {1, "In Combat"},
+        {2, "Out of Combat"}
+    };
+
     public static void Init()
     {
         ElementTypes = new string[]{
@@ -171,6 +186,8 @@ public class Element
     [DefaultValue(false)] public bool refActorObjectEffectLastOnly = false;
     [DefaultValue(false)] public bool refActorUseTransformation = false;
     [DefaultValue(0)] public int refActorTransformationID = 0;
+    [DefaultValue(0)] public int refActorObjectType = 0;
+    [DefaultValue(0)] public int refActorInCombat = 0;
 
     public bool ShouldSerializerefActorTransformationID()
     {

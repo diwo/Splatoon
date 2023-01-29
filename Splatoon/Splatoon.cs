@@ -772,6 +772,8 @@ public unsafe class Splatoon : IDalamudPlugin
                 {
                     var targetable = a.Struct()->GetIsTargetable();
                     if (IsAttributeMatches(e, a)
+                            && CheckActorObjectType(e, a)
+                            && CheckActorInCombat(e, a)
                             && (!e.onlyTargetable || targetable)
                             && (!e.onlyUnTargetable || !targetable)
                             && CheckCharacterAttributes(e, a)
@@ -928,6 +930,21 @@ public unsafe class Splatoon : IDalamudPlugin
                 displayObjects.Add(new DisplayObjectLine(v1.X, v1.Y, v1.Z, v3.X, v3.Y, v3.Z, thc, rect.l1.color));
             }
         }
+    }
+
+    static bool CheckActorObjectType(Element e, GameObject a)
+    {
+        if (e.refActorObjectType == 1 && (!(a is BattleNpc) || !a.IsHostile())) return false;
+        return true;
+    }
+
+    static bool CheckActorInCombat(Element e, GameObject a)
+    {
+        if (!(a is Character)) return true;
+        var isInCombat = ((Character) a).StatusFlags.HasFlag(StatusFlags.InCombat);
+        if (e.refActorInCombat == 1 && !isInCombat) return false;
+        if (e.refActorInCombat == 2 && isInCombat) return false;
+        return true;
     }
 
     static bool CheckCharacterAttributes(Element e, GameObject a, bool ignoreVisibility = false)

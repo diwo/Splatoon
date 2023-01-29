@@ -295,6 +295,34 @@ unsafe partial class CGui
                             el.refActorNPCID = Svc.Targets.Target.Struct()->GetNpcID();
                         }
                     }
+                    SImGuiEx.SizedText("Object type: ".Loc(), WidthElement);
+                    ImGui.SameLine();
+                    ImGui.SetNextItemWidth(100f);
+                    if (ImGui.BeginCombo($"##ObjectTypeCombo{i + k}", el.ObjectTypeOptions[el.refActorObjectType].Loc()))
+                    {
+                        foreach (KeyValuePair<int, string> entry in el.ObjectTypeOptions)
+                        {
+                            if (ImGui.Selectable(entry.Value.Loc()))
+                            {
+                                el.refActorObjectType = entry.Key;
+                            }
+                        }
+                        ImGui.EndCombo();
+                    }
+                    SImGuiEx.SizedText("In combat: ".Loc(), WidthElement);
+                    ImGui.SameLine();
+                    ImGui.SetNextItemWidth(100f);
+                    if (ImGui.BeginCombo($"##InCombatCombo{i + k}", el.InCombatOptions[el.refActorInCombat].Loc()))
+                    {
+                        foreach (KeyValuePair<int, string> entry in el.InCombatOptions)
+                        {
+                            if (ImGui.Selectable(entry.Value.Loc()))
+                            {
+                                el.refActorInCombat = entry.Key;
+                            }
+                        }
+                        ImGui.EndCombo();
+                    }
                     SImGuiEx.SizedText("Targetability: ".Loc(), WidthElement);
                     ImGui.SameLine();
                     ImGui.SetNextItemWidth(100f);
