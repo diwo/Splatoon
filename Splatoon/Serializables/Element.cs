@@ -188,6 +188,7 @@ public class Element
     [DefaultValue(0)] public int refActorTransformationID = 0;
     [DefaultValue(0)] public int refActorObjectType = 0;
     [DefaultValue(0)] public int refActorInCombat = 0;
+    [DefaultValue(false)] public bool excludeTarget = false;
 
     public bool ShouldSerializerefActorTransformationID()
     {

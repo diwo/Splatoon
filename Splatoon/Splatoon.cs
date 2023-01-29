@@ -774,6 +774,7 @@ public unsafe class Splatoon : IDalamudPlugin
                     if (IsAttributeMatches(e, a)
                             && CheckActorObjectType(e, a)
                             && CheckActorInCombat(e, a)
+                            && (!e.excludeTarget || a.ObjectId != Svc.Targets.Target?.ObjectId)
                             && (!e.onlyTargetable || targetable)
                             && (!e.onlyUnTargetable || !targetable)
                             && CheckCharacterAttributes(e, a)

@@ -351,6 +351,9 @@ unsafe partial class CGui
                     {
                         ImGui.SetTooltip("Setting this checkbox will also restrict search to characters ONLY. \n(character - is a player, companion or friendly/hostile NPC that can fight and have HP)".Loc());
                     }
+                    SImGuiEx.SizedText("Exclude target: ".Loc(), WidthElement);
+                    ImGui.SameLine();
+                    ImGui.Checkbox("##ExcludeTarget" + i + k, ref el.excludeTarget);
                 }
 
                 SImGuiEx.SizedText("While casting: ".Loc(), WidthElement);
