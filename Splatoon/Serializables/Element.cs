@@ -15,7 +15,16 @@ public class Element
     public Dictionary<int, string> ObjectTypeOptions = new Dictionary<int, string>
     {
         {0, "Any"},
-        {1, "Hostile NPC"}
+        {1, "NPC"},
+        {2, "Player"}
+    };
+
+    [NonSerialized]
+    public Dictionary<int, string> HostileOptions = new Dictionary<int, string>
+    {
+        {0, "Any"},
+        {1, "Is Hostile"},
+        {2, "Not Hostile"}
     };
 
     [NonSerialized]
@@ -39,7 +48,7 @@ public class Element
         ActorTypes = new string[] {
             "Game object with specific data".Loc(), 
         "Self".Loc(), 
-        "Targeted enemy".Loc()
+        "Targeted character".Loc()
         };
         ComparisonTypes = new string[]{
         "Name (case-insensitive, partial)".Loc(),
@@ -141,7 +150,7 @@ public class Element
     /// <summary>
     /// 0: Game object with specific name |
     /// 1: Self |
-    /// 2: Targeted enemy
+    /// 2: Targeted character
     /// </summary>
     [DefaultValue(0)] public int refActorType = 0;
     [DefaultValue(false)] public bool includeHitbox = false;
@@ -187,6 +196,7 @@ public class Element
     [DefaultValue(false)] public bool refActorUseTransformation = false;
     [DefaultValue(0)] public int refActorTransformationID = 0;
     [DefaultValue(0)] public int refActorObjectType = 0;
+    [DefaultValue(0)] public int refActorHostile = 0;
     [DefaultValue(0)] public int refActorInCombat = 0;
     [DefaultValue(false)] public bool excludeTarget = false;
 
