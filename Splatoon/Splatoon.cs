@@ -729,7 +729,8 @@ public unsafe class Splatoon : IDalamudPlugin
                 && CheckCharacterAttributes(e, Svc.Targets.Target, true)
                 && CheckActorObjectType(e, Svc.Targets.Target)
                 && CheckActorHostile(e, Svc.Targets.Target)
-                && CheckActorInCombat(e, Svc.Targets.Target))
+                && CheckActorInCombat(e, Svc.Targets.Target)
+                && CheckActorRole(e, Svc.Targets.Target))
             {
                 if (i == null || !i.UseDistanceLimit || CheckDistanceCondition(i, Svc.Targets.Target.GetPositionXZY()))
                 {
@@ -779,6 +780,7 @@ public unsafe class Splatoon : IDalamudPlugin
                             && CheckActorObjectType(e, a)
                             && CheckActorHostile(e, a)
                             && CheckActorInCombat(e, a)
+                            && CheckActorRole(e, a)
                             && (!e.excludeTarget || a.ObjectId != Svc.Targets.Target?.ObjectId)
                             && (!e.onlyTargetable || targetable)
                             && (!e.onlyUnTargetable || !targetable)
@@ -960,6 +962,13 @@ public unsafe class Splatoon : IDalamudPlugin
         if (e.refActorInCombat == 1 && !isInCombat) return false;
         if (e.refActorInCombat == 2 && isInCombat) return false;
         return true;
+    }
+
+    static bool CheckActorRole(Element e, GameObject a)
+    {
+        if (e.refActorRole == 0 || !(a is BattleChara)) return true;
+        var role = ((BattleChara) a).ClassJob.GameData.Role;
+        return e.refActorRole == role;
     }
 
     static bool CheckCharacterAttributes(Element e, GameObject a, bool ignoreVisibility = false)

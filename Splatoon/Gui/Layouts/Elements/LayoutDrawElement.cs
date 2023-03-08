@@ -373,6 +373,21 @@ unsafe partial class CGui
                     ImGui.EndCombo();
                 }
 
+                SImGuiEx.SizedText("Role: ".Loc(), WidthElement);
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(100f);
+                if (ImGui.BeginCombo($"##RoleCombo{i + k}", el.RoleOptions[el.refActorRole].Loc()))
+                {
+                    foreach (KeyValuePair<byte, string> entry in el.RoleOptions)
+                    {
+                        if (ImGui.Selectable(entry.Value.Loc()))
+                        {
+                            el.refActorRole = entry.Key;
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
+
                 SImGuiEx.SizedText("While casting: ".Loc(), WidthElement);
                 ImGui.SameLine();
                 ImGui.Checkbox("##casting" + i + k, ref el.refActorRequireCast);

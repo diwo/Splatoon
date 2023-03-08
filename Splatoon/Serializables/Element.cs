@@ -35,6 +35,16 @@ public class Element
         {2, "Out of Combat"}
     };
 
+    [NonSerialized]
+    public Dictionary<byte, string> RoleOptions = new Dictionary<byte, string>
+    {
+        {0, "Any"},
+        {1, "Tank"},
+        {4, "Healer"},
+        {2, "Melee DPS"},
+        {3, "Ranged DPS"}
+    };
+
     public static void Init()
     {
         ElementTypes = new string[]{
@@ -198,6 +208,7 @@ public class Element
     [DefaultValue(0)] public int refActorObjectType = 0;
     [DefaultValue(0)] public int refActorHostile = 0;
     [DefaultValue(0)] public int refActorInCombat = 0;
+    [DefaultValue(0)] public byte refActorRole = 0;
     [DefaultValue(false)] public bool excludeTarget = false;
 
     public bool ShouldSerializerefActorTransformationID()
