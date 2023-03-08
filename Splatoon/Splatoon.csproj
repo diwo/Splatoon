@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<Authors>NightmareXIV</Authors>
-		<Version>3.2.1.0</Version>
+		<Version>3.2.1.3</Version>
 	</PropertyGroup>
 
 	<PropertyGroup>
@@ -102,6 +102,15 @@
 
 	<ItemGroup>
 	  <None Update="LanguageChinese.ini">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="LanguageGerman.ini">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="LanguageJapanese.ini">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="LanguageKorean.ini">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	  <None Update="Splatoon.json">

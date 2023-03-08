@@ -6,6 +6,8 @@ using PInvoke;
 using Splatoon.ConfigGui;
 using Splatoon.Gui;
 using Splatoon.Gui.Scripting;
+using Splatoon.Memory;
+using Splatoon.SplatoonScripting;
 using Splatoon.Utils;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -52,7 +54,7 @@ unsafe partial class CGui:IDisposable
             
     void Draw()
     {
-        if (p.s2wInfo != null) return;
+        if (p.s2wInfo != null || P.PinnedElementEditWindow.IsOpen) return;
         if (!Open) 
         { 
             if(WasOpen)
@@ -61,6 +63,7 @@ unsafe partial class CGui:IDisposable
                 WasOpen = false;
                 Notify.Success("Configuration saved".Loc());
                 if(p.Config.verboselog) p.Log("Configuration saved");
+                ScriptingProcessor.Scripts.Each(x => x.InternalData.UnconditionalDraw = false);
             }
             return;
         }
@@ -80,7 +83,7 @@ unsafe partial class CGui:IDisposable
         ImGui.PushStyleVar(ImGuiStyleVar.WindowMinSize, new Vector2(700, 200));
         var titleColored = false;
         var ctspan = TimeSpan.FromMilliseconds(Environment.TickCount64 - p.CombatStarted);
-        var title = $"Splatoon v{p.loader.splatoonVersion} | {GenericHelpers.GetTerritoryName(Svc.ClientState.TerritoryType).Replace("| ", "")} | {(p.CombatStarted == 0?"Not in combat".Loc(): $"{Loc("Combat")}: {ctspan.Minutes:D2}{(ctspan.Milliseconds < 500?":":" ")}{ctspan.Seconds:D2} ({(int)ctspan.TotalSeconds}.{(ctspan.Milliseconds / 100):D1}s)")} | {Loc("Phase")}: {p.Phase} | {Loc("Layouts")}: {p.LayoutAmount} | {Loc("Elements")}: {p.ElementAmount} | {GetPlayerPositionXZY().X:F1}, {GetPlayerPositionXZY().Y:F1}###Splatoon";
+        var title = $"Splatoon v{p.loader.splatoonVersion} | {GenericHelpers.GetTerritoryName(Svc.ClientState.TerritoryType).Replace("| ", "")} | {(p.CombatStarted == 0?"Not in combat".Loc(): $"{Loc("Combat")}: {ctspan.Minutes:D2}{(ctspan.Milliseconds < 500?":":" ")}{ctspan.Seconds:D2} ({(int)ctspan.TotalSeconds}.{(ctspan.Milliseconds / 100):D1}s)")} | {Loc("Phase")}: {p.Phase} | {Loc("Scene")}: {*Scene.ActiveScene} | {Loc("Layouts")}: {p.LayoutAmount} | {Loc("Elements")}: {p.ElementAmount} | {GetPlayerPositionXZY().X:F1}, {GetPlayerPositionXZY().Y:F1}###Splatoon";
         if (ImGui.Begin(title, ref Open))
         {
             try

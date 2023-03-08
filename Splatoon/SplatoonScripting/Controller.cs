@@ -9,7 +9,7 @@ using System.Xml.Linq;
 #nullable enable
 namespace Splatoon.SplatoonScripting;
 
-public class Controller
+public unsafe class Controller
 {
     internal SplatoonScript Script;
     internal Dictionary<string, Layout> Layouts = new();
@@ -23,6 +23,8 @@ public class Controller
     {
         Script = s;
     }
+
+    public Splatoon Plugin => Splatoon.P;
 
     /// <summary>
     /// Indicates whether player is in combat.
@@ -43,6 +45,8 @@ public class Controller
     /// Amount of miliseconds that have passed since combat start. Returns -1 if not in combat.
     /// </summary>
     public float CombatMiliseconds => InCombat? Environment.TickCount64 - P.CombatStarted : -1;
+
+    public int Scene => *global::Splatoon.Memory.Scene.ActiveScene;
 
     /// <summary>
     /// Loads if unloaded and returns script configuration file.
@@ -263,5 +267,33 @@ public class Controller
     public IEnumerable<PlayerCharacter> GetPartyMembers()
     {
         return FakeParty.Get();
+    }
+
+    public void ApplyOverrides()
+    {
+        foreach(var x in Script.InternalData.Overrides.Elements)
+        {
+            if (Elements.ContainsKey(x.Key))
+            {
+                PluginLog.Debug($"[{Script.InternalData.FullName}] Overriding {x.Key} element with custom data");
+                Elements[x.Key] = x.Value.JSONClone();
+            }
+        }
+    }
+
+    public void SaveOverrides()
+    {
+        if(Script.InternalData.Overrides.Elements.Count > 0)
+        {
+            EzConfig.SaveConfiguration(Script.InternalData.Overrides, Script.InternalData.OverridesPath, true, false);
+        }
+        else
+        {
+            if (File.Exists(Script.InternalData.OverridesPath))
+            {
+                PluginLog.Debug($"No overrides for {Script.InternalData.FullName}, deleting {Script.InternalData.OverridesPath}");
+                File.Delete(Script.InternalData.OverridesPath);
+            }
+        }
     }
 }

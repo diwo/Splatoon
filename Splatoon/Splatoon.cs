@@ -12,6 +12,7 @@ using ECommons.Hooks;
 using ECommons.LanguageHelpers;
 using ECommons.MathHelpers;
 using ECommons.ObjectLifeTracker;
+using ECommons.SimpleGui;
 using Lumina.Excel.GeneratedSheets;
 using PInvoke;
 using Splatoon.Gui;
@@ -85,6 +86,7 @@ public unsafe class Splatoon : IDalamudPlugin
     internal TetherProcessor TetherProcessor;
     internal ObjectEffectProcessor ObjectEffectProcessor;
     internal HttpClient HttpClient;
+    internal PinnedElementEdit PinnedElementEditWindow;
 
     internal void Load(DalamudPluginInterface pluginInterface)
     {
@@ -120,7 +122,12 @@ public unsafe class Splatoon : IDalamudPlugin
 
         DrawingGui = new OverlayGui(this);
         ConfigGui = new CGui(this);
+        EzConfigGui.Init(() => { });
+        Svc.PluginInterface.UiBuilder.OpenConfigUi -= EzConfigGui.Open;
+        PinnedElementEditWindow = new();
+        EzConfigGui.WindowSystem.AddWindow(PinnedElementEditWindow);
         Camera.Init();
+        Scene.Init();
         Svc.Chat.ChatMessage += OnChatMessage;
         Svc.Framework.Update += Tick;
         Svc.ClientState.TerritoryChanged += TerritoryChangedEvent;
@@ -488,6 +495,11 @@ public unsafe class Splatoon : IDalamudPlugin
                     Profiler.MainTickFind.StartTick();
                 }
 
+                if(PinnedElementEditWindow.Script != null && PinnedElementEditWindow.EditingElement != null && !PinnedElementEditWindow.Script.InternalData.UnconditionalDraw)
+                {
+                    ProcessElement(PinnedElementEditWindow.EditingElement, null, true);
+                }
+
                 if (SFind.Count > 0)
                 {
                     foreach (var obj in SFind)
@@ -527,7 +539,7 @@ public unsafe class Splatoon : IDalamudPlugin
                 }
 
                 ScriptingProcessor.Scripts.ForEach(x => { if (x.IsEnabled) x.Controller.Layouts.Values.Each(ProcessLayout); });
-                ScriptingProcessor.Scripts.ForEach(x => { if (x.IsEnabled) x.Controller.Elements.Values.Each(x => ProcessElement(x)); });
+                ScriptingProcessor.Scripts.ForEach(x => { if (x.IsEnabled || x.InternalData.UnconditionalDraw) x.Controller.Elements.Each(z => ProcessElement(z.Value, null, x.InternalData.UnconditionalDraw && x.InternalData.UnconditionalDrawElements.Contains(z.Key))); });
                 foreach (var e in injectedElements)
                 {
                     ProcessElement(e);
@@ -647,7 +659,7 @@ public unsafe class Splatoon : IDalamudPlugin
 
     internal S2WInfo s2wInfo;
 
-    internal void BeginS2W(object cls, string x, string y, string z)
+    public void BeginS2W(object cls, string x, string y, string z)
     {
         s2wInfo = new(cls, x, y, z);
     }
@@ -684,9 +696,9 @@ public unsafe class Splatoon : IDalamudPlugin
         injectedElements.Add(e);
     }
 
-    internal void ProcessElement(Element e, Layout i = null)
+    internal void ProcessElement(Element e, Layout i = null, bool forceEnable = false)
     {
-        if (!e.Enabled) return;
+        if (!e.Enabled && !forceEnable) return;
         ElementAmount++;
         float radius = e.radius;
         if (e.type == 0)
@@ -975,7 +987,7 @@ public unsafe class Splatoon : IDalamudPlugin
     {
         return
             (ignoreVisibility || !e.onlyVisible || (a is Character chr && chr.IsCharacterVisible()))
-            && (!e.refActorRequireCast || (e.refActorCastId.Count > 0 && a is BattleChara chr2 && IsCastingMatches(e, chr2)))
+            && (!e.refActorRequireCast || (e.refActorCastId.Count > 0 && a is BattleChara chr2 && IsCastingMatches(e, chr2) != e.refActorCastReverse))
             && (!e.refActorRequireBuff || (e.refActorBuffId.Count > 0 && a is BattleChara chr3 && CheckEffect(e, chr3)))
             && (!e.refActorUseTransformation || (a is BattleChara chr4 && CheckTransformationID(e, chr4)))
             && (!e.LimitRotation || (a.Rotation >= e.RotationMax && a.Rotation <= e.RotationMin));
@@ -1193,7 +1205,8 @@ public unsafe class Splatoon : IDalamudPlugin
                     .Replace("$CAST", go is BattleChara chr3?$"[{chr3.CastActionId.Format()}] {chr3.CurrentCastTime}/{chr3.TotalCastTime}":"")
                     .Replace("\\n", "\n")
                     .Replace("$VFXID", $"{(go is Character chr4 ? chr4.GetStatusVFXId() : 0).Format()}")
-                    .Replace("$TRANSFORM", $"{(go is Character chr5 ? chr5.GetTransformationID() : 0).Format()}");
+                    .Replace("$TRANSFORM", $"{(go is Character chr5 ? chr5.GetTransformationID() : 0).Format()}")
+                    .Replace("$MSTATUS", $"{(*(int*)(go.Address + 0x104)).Format()}");
             }
             displayObjects.Add(new DisplayObjectText(cx, cy, z + e.offZ + e.overlayVOffset, text, e.overlayBGColor, e.overlayTextColor, e.overlayFScale));
         }
@@ -1327,6 +1340,7 @@ public unsafe class Splatoon : IDalamudPlugin
         if (!i.Enabled) return false;
         if (i.DisableInDuty && Svc.Condition[ConditionFlag.BoundByDuty]) return false;
         if ((i.ZoneLockH.Count > 0 && !i.ZoneLockH.Contains(Svc.ClientState.TerritoryType)).Invert(i.IsZoneBlacklist)) return false;
+        if (i.Scenes.Count > 0 && !i.Scenes.Contains(*Scene.ActiveScene)) return false;
         if (i.Phase != 0 && i.Phase != this.Phase) return false;
         if (i.JobLock != 0 && !Bitmask.IsBitSet(i.JobLock, (int)Svc.ClientState.LocalPlayer.ClassJob.Id)) return false;
         if ((i.DCond == 1 || i.DCond == 3) && !Svc.Condition[ConditionFlag.InCombat]) return false;

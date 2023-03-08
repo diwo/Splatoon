@@ -12,7 +12,7 @@ unsafe partial class CGui
 {
     string ActionName = "";
     string BuffName = "";
-    void LayoutDrawElement(Layout l, Element el)
+    internal void LayoutDrawElement(Layout l, Element el, bool forceEnable = false)
     {
         //var cursor = ImGui.GetCursorPos();
         var i = l.Name;
@@ -388,7 +388,13 @@ unsafe partial class CGui
                     ImGui.EndCombo();
                 }
 
-                SImGuiEx.SizedText("While casting: ".Loc(), WidthElement);
+                ImGui.SetNextItemWidth(WidthElement + ImGui.GetStyle().ItemSpacing.X);
+                if(ImGui.BeginCombo("##whilecasting", el.refActorCastReverse?"While NOT casting".Loc() : "While casting".Loc()))
+                {
+                    if (ImGui.Selectable("While casting".Loc())) el.refActorCastReverse = false;
+                    if (ImGui.Selectable("While NOT casting".Loc())) el.refActorCastReverse = true;
+                    ImGui.EndCombo();
+                }
                 ImGui.SameLine();
                 ImGui.Checkbox("##casting" + i + k, ref el.refActorRequireCast);
                 if (el.refActorRequireCast)
@@ -535,7 +541,7 @@ unsafe partial class CGui
                     ImGui.SameLine();
                     if (ImGuiEx.IconButton(FontAwesomeIcon.MousePointer, "Screen2World".Loc()+"##dist"))
                     {
-                        if (p.IsLayoutVisible(l) && el.Enabled)
+                        if (p.IsLayoutVisible(l) && (el.Enabled || forceEnable))
                         {
                             SetCursorTo(el.DistanceSourceX, el.DistanceSourceY, el.DistanceSourceZ);
                             p.BeginS2W(el, "DistanceSourceX", "DistanceSourceY", "DistanceSourceZ");
@@ -636,6 +642,27 @@ unsafe partial class CGui
                 ImGui.SetNextItemWidth(60f);
                 ImGui.DragFloat("##refz" + i + k, ref el.refZ, 0.02f, float.MinValue, float.MaxValue);
                 ImGui.SameLine();
+                if (ImGuiEx.IconButton(FontAwesomeIcon.Copy))
+                {
+                    ImGui.SetClipboardText(JsonConvert.SerializeObject(new Vector3(el.refX, el.refZ, el.refY)));
+                }
+                ImGui.SameLine();
+                if (ImGuiEx.IconButton(FontAwesomeIcon.Paste))
+                {
+                    try
+                    {
+                        var v = JsonConvert.DeserializeObject<Vector3>(ImGui.GetClipboardText());
+                        el.refX = v.X;
+                        el.refY = v.Z;
+                        el.refZ = v.Y;
+                    }
+                    catch(Exception e)
+                    {
+                        e.Log();
+                        Notify.Error(e.Message);
+                    }
+                }
+                ImGui.SameLine();
                 if (ImGuiEx.IconButton(FontAwesomeIcon.Circle, "0 0 0##ref" + i + k))
                 {
                     el.refX = 0;
@@ -656,7 +683,7 @@ unsafe partial class CGui
                     ImGui.SameLine();
                     if (ImGuiEx.IconButton(FontAwesomeIcon.MousePointer, "Screen2World".Loc()+"##s2w1" + i + k))
                     {
-                        if (p.IsLayoutVisible(l) && el.Enabled)
+                        if (p.IsLayoutVisible(l) && (el.Enabled || forceEnable))
                         {
                             SetCursorTo(el.refX, el.refZ, el.refY);
                             p.BeginS2W(el, "refX", "refY", "refZ");
@@ -777,7 +804,7 @@ unsafe partial class CGui
                 ImGui.SameLine();
                 if (ImGuiEx.IconButton(FontAwesomeIcon.MousePointer, "Screen2World".Loc()+"##s2w2" + i + k))
                 {
-                    if (p.IsLayoutVisible(l) && el.Enabled/* && p.CamAngleY <= p.Config.maxcamY*/)
+                    if (p.IsLayoutVisible(l) && (el.Enabled || forceEnable)/* && p.CamAngleY <= p.Config.maxcamY*/)
                     {
                         SetCursorTo(el.offX, el.offZ, el.offY);
                         p.BeginS2W(el, "offX", "offY", "offZ");

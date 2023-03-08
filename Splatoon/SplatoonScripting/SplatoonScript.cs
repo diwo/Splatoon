@@ -1,6 +1,11 @@
 ﻿#nullable enable
+using Dalamud.Interface.Colors;
+using ECommons;
 using ECommons.Hooks;
 using ECommons.Hooks.ActionEffectTypes;
+using ECommons.LanguageHelpers;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Newtonsoft.Json;
 
 namespace Splatoon.SplatoonScripting;
 
@@ -138,6 +143,101 @@ public abstract class SplatoonScript
     /// If you override this method, settings section will be added to your script. You can call ImGui methods in this function to draw configuration UI. Keep it simple.
     /// </summary>
     public virtual void OnSettingsDraw() { }
+
+    internal void DrawRegisteredElements()
+    {
+        ImGuiEx.TextWrapped(ImGuiColors.DalamudRed, $"Non-restricted editing access. Any incorrectly performed changes may cause script to stop working completely. Use reset function if it happens. \n- In general, only edit color, thickness, text, size. \n- If script has it's own color settings, they will be prioritized.\n- Not all script will take whatever you edit here into account.".Loc());
+        if(ImGui.Button("Export customized settings to clipboard".Loc()))
+        {
+            ImGui.SetClipboardText(JsonConvert.SerializeObject(InternalData.Overrides, new JsonSerializerSettings() { DefaultValueHandling = DefaultValueHandling.Populate}));
+            Notify.Success("Copied to clipboard".Loc());
+        }
+        ImGui.SameLine();
+        if(ImGui.Button("Import customized settings from clipboard (hold CTRL+click)".Loc()))
+        {
+            if (ImGui.GetIO().KeyCtrl)
+            {
+                try
+                {
+                    var x = JsonConvert.DeserializeObject<OverrideData>(ImGui.GetClipboardText());
+                    if (x != null)
+                    {
+                        if (ImGui.GetIO().KeyShift || x.Elements.All(z => Controller.GetRegisteredElements().ContainsKey(z.Key)))
+                        {
+                            InternalData.Overrides = x;
+                            Controller.ApplyOverrides();
+                            Notify.Success("Import success");
+                        }
+                        else
+                        {
+                            Notify.Error("Import contains keys that were not registered by script.\nImport blocked.\nTo override, hold CTRL+SHIFT while importing.");
+                        }
+                    }
+                }
+                catch(Exception e)
+                {
+                    e.Log();
+                    Notify.Error(e.Message);
+                }
+            }
+        }
+        ImGui.Checkbox($"Enable unconditional element preview".Loc(), ref InternalData.UnconditionalDraw);
+        if (InternalData.UnconditionalDraw)
+        {
+            if (ImGui.Button("Preview draw all".Loc()))
+            {
+                Controller.GetRegisteredElements().Each(x => InternalData.UnconditionalDrawElements.Add(x.Key));
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Preview draw none".Loc()))
+            {
+                InternalData.UnconditionalDrawElements.Clear();
+            }
+        }
+        foreach (var x in Controller.GetRegisteredElements())
+        {
+            ImGui.PushID(x.Value.GUID);
+            if (InternalData.UnconditionalDraw)
+            {
+                ImGuiEx.HashSetCheckbox($"Preview draw".Loc(), x.Key, InternalData.UnconditionalDrawElements);
+                ImGui.SameLine();
+            }
+            if (ImGui.Button("Copy to clipboard".Loc()))
+            {
+                ImGui.SetClipboardText(JsonConvert.SerializeObject(x.Value, new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore }));
+            }
+            ImGui.SameLine();
+            if (ImGui.Button("Edit".Loc()))
+            {
+                if (!InternalData.Overrides.Elements.ContainsKey(x.Key))
+                {
+                    Notify.Info($"Created override for {x.Key}");
+                    InternalData.Overrides.Elements[x.Key] = x.Value.JSONClone();
+                }
+                P.PinnedElementEditWindow.Open(this, x.Key);
+            }
+            ImGui.SameLine();
+            if (InternalData.Overrides.Elements.ContainsKey(x.Key))
+            {
+                ImGuiEx.HashSetCheckbox("Reset".Loc(), x.Key, InternalData.ElementsResets);
+            }
+            ImGui.SameLine();
+            ImGuiEx.Text($"[{x.Key}] {x.Value.Name}");
+            ImGui.PopID();
+        }
+        if (InternalData.ElementsResets.Count > 0)
+        {
+            if (ImGui.Button("Reset selected elements and reload script".Loc()))
+            {
+                foreach(var x in InternalData.ElementsResets)
+                {
+                    InternalData.Overrides.Elements.Remove(x);
+                }
+                Controller.SaveOverrides();
+                ScriptingProcessor.ReloadScript(this);
+            }
+        }
+    }
 
     public bool DoSettingsDraw => this.GetType().GetMethod(nameof(OnSettingsDraw))?.DeclaringType != typeof(SplatoonScript);
 

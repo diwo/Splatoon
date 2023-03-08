@@ -161,6 +161,18 @@ internal static class TabScripting
                 }
                 ImGuiEx.Tooltip("Open script's settings".Loc());
             }
+            else if(x.Controller.GetRegisteredElements().Count > 0)
+            {
+                if (ImGuiEx.IconButton(FontAwesomeIcon.PaintBrush))
+                {
+                    if (x.InternalData.ConfigOpen)
+                    {
+                        openConfig.Controller.SaveConfig();
+                    }
+                    x.InternalData.ConfigOpen = !x.InternalData.ConfigOpen;
+                }
+                ImGuiEx.Tooltip("Open element editor".Loc());
+            }
             else
             {
                 ImGui.PushStyleVar(ImGuiStyleVar.Alpha, 0f);
@@ -170,6 +182,13 @@ internal static class TabScripting
             }
             ImGui.SameLine();
 
+            if (ImGuiEx.IconButton("\uf0e2"))
+            {
+                ScriptingProcessor.ReloadScript(x);
+            }
+            ImGuiEx.Tooltip("Reload this script");
+
+            ImGui.SameLine();
 
             if (ImGuiEx.IconButton(FontAwesomeIcon.Trash) && ImGui.GetIO().KeyCtrl)
             {
@@ -200,14 +219,20 @@ internal static class TabScripting
                 ImGuiEx.Text(ImGuiColors.DalamudYellow, $"{openConfig.InternalData.FullName} configuration");
             });
             ImGui.Separator();
-            try
-            {
-                openConfig.OnSettingsDraw();
-            }
-            catch (Exception ex)
-            {
-                ex.Log();
-            }
+            ImGuiEx.EzTabBar("##scriptConfig", 
+                (openConfig.InternalData.SettingsPresent?"Configuration":null, () => {
+                    try
+                    {
+                        openConfig.OnSettingsDraw();
+                    }
+                    catch (Exception ex)
+                    {
+                        ex.Log();
+                    }
+                }, null, false),
+                (openConfig.Controller.GetRegisteredElements().Count>0?"Registered elements":null, openConfig.DrawRegisteredElements, null, false)
+                );
+            
             ImGuiEx.ImGuiLineCentered("ScriptConfig", delegate
             {
                 if (ImGui.Button("Close and save configuration"))

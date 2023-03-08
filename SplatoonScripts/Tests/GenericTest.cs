@@ -1,13 +1,18 @@
-﻿using Dalamud.Game.ClientState.Objects.Types;
+﻿using Dalamud.Game.ClientState.Objects.SubKinds;
+using Dalamud.Game.ClientState.Objects.Types;
 using Dalamud.Hooking;
+using Dalamud.Interface.Colors;
 using Dalamud.Utility.Signatures;
 using ECommons;
 using ECommons.DalamudServices;
 using ECommons.ExcelServices.TerritoryEnumeration;
 using ECommons.GameFunctions;
 using ECommons.Hooks.ActionEffectTypes;
+using ECommons.ImGuiMethods;
 using ECommons.Logging;
 using ECommons.MathHelpers;
+using FFXIVClientStructs.FFXIV.Client.Graphics.Environment;
+using ImGuiNET;
 using Splatoon.SplatoonScripting;
 using System;
 using System.Collections.Generic;
@@ -23,41 +28,28 @@ namespace SplatoonScriptsOfficial.Tests
     {
         public override HashSet<uint> ValidTerritories => new() {  };
 
-        //__int64 __fastcall sub_1411BFB30(__int64 a1)
-        delegate nint Func(nint a1);
-        [Signature("40 56 48 83 EC 20 48 8B F1 E8 ?? ?? ?? ?? 83 BE", DetourName =nameof(Detour))]
-        Hook<Func> Hook;
+        int value = 0;
 
-        //__int64 __fastcall Component::GUI::AtkUnitBase_FireCallback(__int64 *a1, int a2, __int64 a3, char a4)
-        delegate nint Func2(nint* a1, int a2, nint a3, byte a4);
-        [Signature("48 89 5C 24 ?? 48 89 6C 24 ?? 56 57 41 54 41 56 41 57 48 81 EC ?? ?? ?? ?? 48 8B 05 ?? ?? ?? ?? 48 33 C4 48 89 44 24 ?? BF", DetourName = nameof(Detour2))]
-        Hook<Func2> Hook2;
-
-        nint Detour2(nint* a1, int a2, nint a3, byte a4)
+        public override void OnSetup()
         {
-            DuoLog.Information($"{(nint)a1:X16}, {a2:X8}");
-            return Hook2.Original(a1, a2, a3, a4);
+            Controller.RegisterElementFromCode("Test", "{\"Name\":\"\",\"type\":1,\"radius\":4.0,\"refActorType\":1,\"Filled\":true}");
+            base.OnSetup();
         }
 
-        nint Detour(nint a1)
+        public override void OnUpdate()
         {
-            DuoLog.Information($"{a1:X16}");
-            return Hook.Original(a1);
+            Controller.GetElementByName("Test").color = GradientColor.Get(GradientColor.Get(0xFF00FF00.ToVector4(), 0xFFFF0000.ToVector4()), GradientColor.Get(0xFF0000FF.ToVector4(), 0xFF000000.ToVector4()), 4000).ToUint();
         }
 
-        public override void OnEnable()
+        public override void OnSettingsDraw()
         {
-            SignatureHelper.Initialise(this);
-            Hook?.Enable();
-            Hook2?.Enable();
-        }
-
-        public override void OnDisable()
-        {
-            Hook?.Disable();
-            Hook?.Dispose();
-            Hook2?.Disable();
-            Hook2?.Dispose();
+            ImGui.InputInt("", ref value);
+            if (ImGui.Button("Apply"))
+            {
+                var x = (nint)EnvManager.Instance();
+                x += 36;
+                *(byte*)x = (byte)value;
+            }
         }
     }
 }
