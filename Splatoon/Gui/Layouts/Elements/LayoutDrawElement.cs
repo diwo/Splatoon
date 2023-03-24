@@ -502,6 +502,10 @@ unsafe partial class CGui
                     ImGui.Checkbox("Invert behavior".Loc()+"##" + i + k, ref el.refActorRequireBuffsInvert);
                 }
 
+                SImGuiEx.SizedText("Low MP:".Loc(), WidthElement);
+                ImGui.SameLine();
+                ImGui.Checkbox("##lowMp", ref el.refActorLowMp);
+
                 SImGuiEx.SizedText("Distance limit".Loc(), WidthElement);
                 ImGui.SameLine();
                 ImGui.Checkbox("##dstLim", ref el.LimitDistance);

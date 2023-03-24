@@ -989,6 +989,7 @@ public unsafe class Splatoon : IDalamudPlugin
             (ignoreVisibility || !e.onlyVisible || (a is Character chr && chr.IsCharacterVisible()))
             && (!e.refActorRequireCast || (e.refActorCastId.Count > 0 && a is BattleChara chr2 && IsCastingMatches(e, chr2) != e.refActorCastReverse))
             && (!e.refActorRequireBuff || (e.refActorBuffId.Count > 0 && a is BattleChara chr3 && CheckEffect(e, chr3)))
+            && (!e.refActorLowMp || (a is BattleChara chr5 && LowMp(chr5)))
             && (!e.refActorUseTransformation || (a is BattleChara chr4 && CheckTransformationID(e, chr4)))
             && (!e.LimitRotation || (a.Rotation >= e.RotationMax && a.Rotation <= e.RotationMin));
     }
@@ -1055,6 +1056,11 @@ public unsafe class Splatoon : IDalamudPlugin
                 return c.StatusList.Where(x => !e.refActorUseBuffParam || x.Param == e.refActorBuffParam).Select(x => x.StatusId).ContainsAny(e.refActorBuffId).Invert(e.refActorRequireBuffsInvert);
             }
         }
+    }
+
+    static bool LowMp(BattleChara c)
+    {
+        return !c.IsDead && c.CurrentMp <= c.MaxMp / 2;
     }
 
     static bool IsObjectEffectMatches(Element e, GameObject o, List<CachedObjectEffectInfo> info)

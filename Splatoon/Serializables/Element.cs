@@ -142,6 +142,7 @@ public class Element
     [DefaultValue(0)] public int refActorBuffParam = 0;
     [DefaultValue(0f)] public float refActorBuffTimeMin = 0f;
     [DefaultValue(0f)] public float refActorBuffTimeMax = 0f;
+    [DefaultValue(false)] public bool refActorLowMp = false;
     [DefaultValue(false)] public bool refActorObjectLife = false;
     [DefaultValue(0)] public float refActorLifetimeMin = 0;
     [DefaultValue(0)] public float refActorLifetimeMax = 0;
