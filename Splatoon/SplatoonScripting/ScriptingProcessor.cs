@@ -25,7 +25,7 @@ internal static partial class ScriptingProcessor
     };
     internal static ImmutableList<BlacklistData> Blacklist = ImmutableList<BlacklistData>.Empty;
     internal static volatile bool UpdateCompleted = false;
-    internal static List<string> ForceUpdate = [];
+    internal static List<string> ForceUpdate = new();
 
     internal static string ExtractNamespaceFromCode(string code)
     {
