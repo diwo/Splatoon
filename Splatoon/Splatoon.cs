@@ -744,7 +744,12 @@ public unsafe class Splatoon : IDalamudPlugin
                 }
             }
             else if (e.refActorType == 2 && Svc.Targets.Target != null
-                && Svc.Targets.Target is BattleNpc && CheckCharacterAttributes(e, Svc.Targets.Target, true))
+                && Svc.Targets.Target is BattleChara
+                && CheckCharacterAttributes(e, Svc.Targets.Target, true)
+                && CheckActorObjectType(e, Svc.Targets.Target)
+                && CheckActorHostile(e, Svc.Targets.Target)
+                && CheckActorInCombat(e, Svc.Targets.Target)
+                && CheckActorRole(e, Svc.Targets.Target))
             {
                 if (i == null || !i.UseDistanceLimit || CheckDistanceCondition(i, Svc.Targets.Target.GetPositionXZY()))
                 {
@@ -791,6 +796,11 @@ public unsafe class Splatoon : IDalamudPlugin
                 {
                     var targetable = a.Struct()->GetIsTargetable();
                     if (IsAttributeMatches(e, a)
+                            && CheckActorObjectType(e, a)
+                            && CheckActorHostile(e, a)
+                            && CheckActorInCombat(e, a)
+                            && CheckActorRole(e, a)
+                            && (!e.excludeTarget || a.ObjectId != Svc.Targets.Target?.ObjectId)
                             && (!e.onlyTargetable || targetable)
                             && (!e.onlyUnTargetable || !targetable)
                             && CheckCharacterAttributes(e, a)
@@ -960,12 +970,44 @@ public unsafe class Splatoon : IDalamudPlugin
         }
     }
 
+    static bool CheckActorObjectType(Element e, GameObject a)
+    {
+        if (e.refActorObjectType == 1 && !(a is BattleNpc)) return false;
+        if (e.refActorObjectType == 2 && a.ObjectKind != ObjectKind.Player) return false;
+        return true;
+    }
+
+    static bool CheckActorHostile(Element e, GameObject a)
+    {
+        if (!(a is BattleChara)) return true;
+        if (e.refActorHostile == 1 && !((BattleChara) a).IsHostile()) return false;
+        if (e.refActorHostile == 2 && ((BattleChara) a).IsHostile()) return false;
+        return true;
+    }
+
+    static bool CheckActorInCombat(Element e, GameObject a)
+    {
+        if (!(a is Character)) return true;
+        var isInCombat = ((Character) a).StatusFlags.HasFlag(StatusFlags.InCombat);
+        if (e.refActorInCombat == 1 && !isInCombat) return false;
+        if (e.refActorInCombat == 2 && isInCombat) return false;
+        return true;
+    }
+
+    static bool CheckActorRole(Element e, GameObject a)
+    {
+        if (e.refActorRole == 0 || !(a is BattleChara)) return true;
+        var role = ((BattleChara) a).ClassJob.GameData.Role;
+        return e.refActorRole == role;
+    }
+
     static bool CheckCharacterAttributes(Element e, GameObject a, bool ignoreVisibility = false)
     {
         return
             (ignoreVisibility || !e.onlyVisible || (a is Character chr && chr.IsCharacterVisible()))
             && (!e.refActorRequireCast || (e.refActorCastId.Count > 0 && a is BattleChara chr2 && IsCastingMatches(e, chr2) != e.refActorCastReverse))
             && (!e.refActorRequireBuff || (e.refActorBuffId.Count > 0 && a is BattleChara chr3 && CheckEffect(e, chr3)))
+            && (!e.refActorLowMp || (a is BattleChara chr5 && LowMp(chr5)))
             && (!e.refActorUseTransformation || (a is BattleChara chr4 && CheckTransformationID(e, chr4)))
             && (!e.LimitRotation || (a.Rotation >= e.RotationMax && a.Rotation <= e.RotationMin));
     }
@@ -1032,6 +1074,11 @@ public unsafe class Splatoon : IDalamudPlugin
                 return c.StatusList.Where(x => !e.refActorUseBuffParam || x.Param == e.refActorBuffParam).Select(x => x.StatusId).ContainsAny(e.refActorBuffId).Invert(e.refActorRequireBuffsInvert);
             }
         }
+    }
+
+    static bool LowMp(BattleChara c)
+    {
+        return !c.IsDead && c.CurrentMp <= c.MaxMp / 2;
     }
 
     static bool IsObjectEffectMatches(Element e, GameObject o, List<CachedObjectEffectInfo> info)
