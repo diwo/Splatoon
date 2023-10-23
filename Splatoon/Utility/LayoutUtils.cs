@@ -88,7 +88,7 @@ public static unsafe class LayoutUtils
 
     public static bool CheckCharacterAttributes(Element e, IGameObject a, bool ignoreVisibility = false)
     {
-        return
+        bool matched =
             (ignoreVisibility || !e.onlyVisible || (a is ICharacter chr && chr.IsCharacterVisible()))
             && (!e.refActorRequireCast || (e.refActorCastId.Count > 0 && a is IBattleChara chr2 && IsCastingMatches(e, chr2) != e.refActorCastReverse))
             && (!e.refActorRequireBuff || (e.refActorBuffId.Count > 0 && a is IBattleChara chr3 && CheckEffect(e, chr3)))
@@ -96,6 +96,88 @@ public static unsafe class LayoutUtils
             && (!e.refMark || (a is IBattleChara chr5 && Marking.HaveMark(chr5, (uint)e.refMarkID)))
             && (!e.LimitRotation || (a.Rotation >= e.RotationMax && a.Rotation <= e.RotationMin))
             && (!e.refActorTether || IsTetherMatches(e, a) == !e.refActorIsTetherInvert);
+
+        return
+            matched
+            && (!e.excludeTarget || a.EntityId != Svc.Targets.Target?.EntityId)
+            && (!e.excludeSelf || a.EntityId != Svc.ClientState.LocalPlayer?.EntityId)
+            && CheckActorObjectType(e, a)
+            && CheckActorHostile(e, a)
+            && CheckActorInCombat(e, a)
+            && CheckActorIsAlive(e, a)
+            && CheckActorHuntTargetRank(e, a)
+            && CheckActorRole(e, a)
+            && CheckActorOnlineStatus(e, a)
+            && CheckActorLowHp(e, a)
+            && CheckActorLowMp(e, a);
+    }
+
+    static bool CheckActorObjectType(Element e, IGameObject a)
+    {
+        if (e.refActorObjectType == 1 && !(a is IBattleNpc)) return false;
+        if (e.refActorObjectType == 2 && (a.ObjectKind != Dalamud.Game.ClientState.Objects.Enums.ObjectKind.Player || a.EntityId == 0xE0000000)) return false;
+        if (e.refActorObjectType == 3 && a.ObjectKind != Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventNpc) return false;
+        if (e.refActorObjectType == 4 && a.ObjectKind != Dalamud.Game.ClientState.Objects.Enums.ObjectKind.EventObj) return false;
+        return true;
+    }
+
+    static bool CheckActorHostile(Element e, IGameObject a)
+    {
+        if (!(a is IBattleChara)) return true;
+        if (e.refActorHostile == 1 && !((IBattleChara) a).IsHostile()) return false;
+        if (e.refActorHostile == 2 && ((IBattleChara) a).IsHostile()) return false;
+        return true;
+    }
+
+    static bool CheckActorInCombat(Element e, IGameObject a)
+    {
+        if (!(a is IBattleChara)) return true;
+        var isInCombat = ((IBattleChara) a).StatusFlags.HasFlag(Dalamud.Game.ClientState.Objects.Enums.StatusFlags.InCombat);
+        if (e.refActorInCombat == 1 && !isInCombat) return false;
+        if (e.refActorInCombat == 2 && isInCombat) return false;
+        return true;
+    }
+
+    static bool CheckActorIsAlive(Element e, IGameObject a)
+    {
+        if (!(a is IBattleChara)) return true;
+        var isAlive = ((IBattleChara) a).CurrentHp > 0;
+        if (e.refActorIsAlive == 1 && !isAlive) return false;
+        if (e.refActorIsAlive == 2 && isAlive) return false;
+        return true;
+    }
+
+    static bool CheckActorHuntTargetRank(Element e, IGameObject a)
+    {
+        if (e.refActorHuntTargetRank == 0) return true;
+        if (!(a is IBattleNpc)) return false;
+        if (!HuntTargetToRank.TryGetValue(((IBattleNpc)a).DataId, out var rank)) return false;
+        return rank == e.refActorHuntTargetRank;
+    }
+
+    static bool CheckActorRole(Element e, IGameObject a)
+    {
+        if (e.refActorRole == 0 || !(a is IBattleChara)) return true;
+        var role = ((IBattleChara) a).ClassJob.Value.Role;
+        return e.refActorRole == role;
+    }
+
+    static bool CheckActorOnlineStatus(Element e, IGameObject a)
+    {
+        if (e.refActorOnlineStatus == 0 || a is not ICharacter c) return true;
+        return e.OnlineStatusOptions[e.refActorOnlineStatus] == c.OnlineStatus.Value.Name;
+    }
+
+    static bool CheckActorLowHp(Element e, IGameObject a)
+    {
+        if (!e.refActorLowHp || a is not IBattleChara c) return true;
+        return !c.IsDead && c.CurrentHp <= c.MaxHp / 2;
+    }
+
+    static bool CheckActorLowMp(Element e, IGameObject a)
+    {
+        if (!e.refActorLowMp || a is not IBattleChara c) return true;
+        return !c.IsDead && c.CurrentMp <= c.MaxMp / 2;
     }
 
     public static bool IsTetherMatches(Element e, IGameObject obj)

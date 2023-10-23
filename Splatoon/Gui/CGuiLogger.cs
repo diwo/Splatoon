@@ -17,6 +17,17 @@ internal partial class CGui
         ImGui.Checkbox("Viewer mode".Loc(), ref IsViewer);
         ImGuiComponents.HelpMarker("When enabled, only currently present objects are displayed".Loc());
         ImGui.SameLine();
+        if(ImGui.Button("Add all data".Loc()))
+        {
+            var layout = getLoggerLayout();
+            layout.ElementsL.Clear();
+            foreach (var x in p.loggedObjectList)
+            {
+                AddElementByDataID(layout, x.Key.DataID, x.Key.Name);
+            }
+            layout.Enabled = true;
+        }
+        ImGui.SameLine();
         if(ImGui.Button("Clear list".Loc()))
         {
             p.loggedObjectList.Clear();
@@ -77,7 +88,7 @@ internal partial class CGui
                 }
             }
             ImGui.SameLine();
-            if (ImGui.SmallButton("Find".Loc()+"##"+i))
+            if (oid != "--" && ImGui.SmallButton("Find".Loc()+"##"+i))
             {
                 p.SFind.Clear();
                 p.SFind.Add(new()
@@ -91,6 +102,11 @@ internal partial class CGui
             ImGuiEx.TextCopy(oidl);
             ImGui.TableNextColumn();
             ImGuiEx.TextCopy(did);
+            ImGui.SameLine();
+            if (did != "--" && ImGui.SmallButton("Add".Loc()+"##"+i))
+            {
+                AddElementByDataID(getLoggerLayout(), x.Key.DataID, x.Key.Name);
+            }
             ImGui.TableNextColumn();
             ImGuiEx.TextCopy(mid);
             ImGui.TableNextColumn();

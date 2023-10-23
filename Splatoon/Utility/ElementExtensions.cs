@@ -40,7 +40,7 @@ public static class ElementExtensions
         e.thicc = value.strokeThickness;
         e.Filled = value.filled;
         e.overrideFillColor = value.overrideFillColor;
-        e.fillIntensity = value.fillIntensity;
+        e.fillIntensity = Math.Min(value.fillIntensity, 0.25f);
         e.originFillColor = value.originFillColor;
         e.endFillColor = value.endFillColor;
     }
@@ -49,7 +49,7 @@ public static class ElementExtensions
     {
         // Most elements used line fill with Filled = false and need fill migration.
         bool needsPolygonalFillMigration = e.fillIntensity == null;
-        float fillIntensity = e.fillIntensity ?? e.GetDefaultFillIntensity();
+        float fillIntensity = Math.Min(e.fillIntensity ?? e.GetDefaultFillIntensity(), 0.25f);
         if (needsPolygonalFillMigration)
         {
             // Non-donut circles are the only shapes that don't need fill migration because they had functioning Fill.

@@ -78,6 +78,7 @@ public unsafe class Splatoon :IDalamudPlugin
     internal static Dictionary<string, nint> PlaceholderCache = new();
     internal static Dictionary<string, uint> NameNpcIDsAll = new();
     internal static Dictionary<string, uint> NameNpcIDs = new();
+    internal static Dictionary<uint, byte> HuntTargetToRank = new();
     internal MapEffectProcessor mapEffectProcessor;
     internal TetherProcessor TetherProcessor;
     internal ObjectEffectProcessor ObjectEffectProcessor;
@@ -164,6 +165,7 @@ public unsafe class Splatoon :IDalamudPlugin
             NameNpcIDs = dict.Where(x => x.Value != 0).ToDictionary(x => x.Key, x => x.Value);
             NameNpcIDsAll = dictAll;
         });
+        SetupHuntTargets();
         StreamDetector.Start();
         AttachedInfo.Init();
         Logger.OnTerritoryChanged();
@@ -173,7 +175,8 @@ public unsafe class Splatoon :IDalamudPlugin
             "Only in instance".Loc(),
             "Only in combat AND instance".Loc(),
             "Only in combat OR instance".Loc(),
-            "On trigger only".Loc() };
+            "On trigger only".Loc(),
+            "Not in instance".Loc() };
         Element.Init();
         mapEffectProcessor = new();
         TetherProcessor = new();
@@ -212,6 +215,13 @@ public unsafe class Splatoon :IDalamudPlugin
         ScriptingProcessor.ReloadAll();
         Init = true;
         SplatoonIPC.Init();
+    }
+
+    private void SetupHuntTargets()
+    {
+        foreach (var monster in Svc.Data.GetExcelSheet<NotoriousMonster>()) {
+            HuntTargetToRank[monster.BNpcBase.Value.RowId] = monster.Rank;
+        }
     }
 
     public void Dispose()

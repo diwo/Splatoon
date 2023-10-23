@@ -401,7 +401,119 @@ internal unsafe partial class CGui
                 {
                     ImGui.SetTooltip("Setting this checkbox will also restrict search to characters ONLY. \n(character - is a player, companion or friendly/hostile NPC that can fight and have HP)".Loc());
                 }
+                ImGuiUtils.SizedText("Exclude target: ".Loc(), WidthElement);
+                ImGui.SameLine();
+                ImGui.Checkbox("##ExcludeTarget" + i + k, ref el.excludeTarget);
+
+                ImGuiUtils.SizedText("Exclude self: ".Loc(), WidthElement);
+                ImGui.SameLine();
+                ImGui.Checkbox("##ExcludeSelf" + i + k, ref el.excludeSelf);
             }
+
+                ImGuiUtils.SizedText("Object type: ".Loc(), WidthElement);
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(100f);
+                if (ImGui.BeginCombo($"##ObjectTypeCombo{i + k}", el.ObjectTypeOptions[el.refActorObjectType].Loc()))
+                {
+                    foreach (KeyValuePair<int, string> entry in el.ObjectTypeOptions)
+                    {
+                        if (ImGui.Selectable(entry.Value.Loc()))
+                        {
+                            el.refActorObjectType = entry.Key;
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
+
+                ImGuiUtils.SizedText("Hostile: ".Loc(), WidthElement);
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(100f);
+                if (ImGui.BeginCombo($"##HostileCombo{i + k}", el.HostileOptions[el.refActorHostile].Loc()))
+                {
+                    foreach (KeyValuePair<int, string> entry in el.HostileOptions)
+                    {
+                        if (ImGui.Selectable(entry.Value.Loc()))
+                        {
+                            el.refActorHostile = entry.Key;
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
+
+                ImGuiUtils.SizedText("In combat: ".Loc(), WidthElement);
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(100f);
+                if (ImGui.BeginCombo($"##InCombatCombo{i + k}", el.InCombatOptions[el.refActorInCombat].Loc()))
+                {
+                    foreach (KeyValuePair<int, string> entry in el.InCombatOptions)
+                    {
+                        if (ImGui.Selectable(entry.Value.Loc()))
+                        {
+                            el.refActorInCombat = entry.Key;
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
+
+                ImGuiUtils.SizedText("Is Alive: ".Loc(), WidthElement);
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(100f);
+                if (ImGui.BeginCombo($"##IsAliveCombo{i + k}", el.IsAliveOptions[el.refActorIsAlive].Loc()))
+                {
+                    foreach (KeyValuePair<int, string> entry in el.IsAliveOptions)
+                    {
+                        if (ImGui.Selectable(entry.Value.Loc()))
+                        {
+                            el.refActorIsAlive = entry.Key;
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
+
+                ImGuiUtils.SizedText("Hunt Target Rank: ".Loc(), WidthElement);
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(100f);
+                if (ImGui.BeginCombo($"##HuntTargetRankCombo{i + k}", el.HuntTargetRankOptions[el.refActorHuntTargetRank].Loc()))
+                {
+                    foreach (KeyValuePair<byte, string> entry in el.HuntTargetRankOptions)
+                    {
+                        if (ImGui.Selectable(entry.Value.Loc()))
+                        {
+                            el.refActorHuntTargetRank = entry.Key;
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
+
+                ImGuiUtils.SizedText("Role: ".Loc(), WidthElement);
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(100f);
+                if (ImGui.BeginCombo($"##RoleCombo{i + k}", el.RoleOptions[el.refActorRole].Loc()))
+                {
+                    foreach (KeyValuePair<byte, string> entry in el.RoleOptions)
+                    {
+                        if (ImGui.Selectable(entry.Value.Loc()))
+                        {
+                            el.refActorRole = entry.Key;
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
+
+                ImGuiUtils.SizedText("Online status: ".Loc(), WidthElement);
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(100f);
+                if (ImGui.BeginCombo($"##OnlineStatusCombo{i + k}", el.OnlineStatusOptions[el.refActorOnlineStatus].Loc()))
+                {
+                    foreach (KeyValuePair<byte, string> entry in el.OnlineStatusOptions)
+                    {
+                        if (ImGui.Selectable(entry.Value.Loc()))
+                        {
+                            el.refActorOnlineStatus = entry.Key;
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
 
             ImGui.SetNextItemWidth(WidthElement + ImGui.GetStyle().ItemSpacing.X);
             if (ImGui.BeginCombo("##whilecasting", el.refActorCastReverse ? "While NOT casting".Loc() : "While casting".Loc()))
@@ -521,6 +633,14 @@ internal unsafe partial class CGui
                 ImGui.SameLine();
                 ImGui.Checkbox("Invert behavior".Loc() + "##" + i + k, ref el.refActorRequireBuffsInvert);
             }
+
+            ImGuiUtils.SizedText("Low HP:".Loc(), WidthElement);
+            ImGui.SameLine();
+            ImGui.Checkbox("##lowHp", ref el.refActorLowHp);
+
+            ImGuiUtils.SizedText("Low MP:".Loc(), WidthElement);
+            ImGui.SameLine();
+            ImGui.Checkbox("##lowMp", ref el.refActorLowMp);
 
             ImGuiUtils.SizedText("Distance limit".Loc(), WidthElement);
             ImGui.SameLine();

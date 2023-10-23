@@ -87,7 +87,7 @@ internal sealed unsafe class ImGuiLegacyRenderer : RenderEngine
                 }
             }
             else if (e.refActorType == 2 && Svc.Targets.Target != null
-                && Svc.Targets.Target is IBattleNpc && LayoutUtils.CheckCharacterAttributes(e, Svc.Targets.Target, true))
+                && Svc.Targets.Target is IBattleChara && LayoutUtils.CheckCharacterAttributes(e, Svc.Targets.Target, true))
             {
                 if (i == null || !i.UseDistanceLimit || LayoutUtils.CheckDistanceCondition(i, Svc.Targets.Target.GetPositionXZY()))
                 {
@@ -138,8 +138,8 @@ internal sealed unsafe class ImGuiLegacyRenderer : RenderEngine
                 foreach (var a in Svc.Objects)
                 {
                     var targetable = a.Struct()->GetIsTargetable();
-                    if (LayoutUtils.IsAttributeMatches(e, a)
-                            && CommonRenderUtils.IsElementObjectMatches(e, targetable, a))
+                    if (CommonRenderUtils.IsElementObjectMatches(e, targetable, a)
+                            && LayoutUtils.IsAttributeMatches(e, a))
                     {
                         if (i == null || !i.UseDistanceLimit || LayoutUtils.CheckDistanceCondition(i, a.GetPositionXZY()))
                         {

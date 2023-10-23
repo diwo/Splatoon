@@ -12,6 +12,81 @@ public class Element
     public static string[] ElementTypes = Array.Empty<string>();
     [NonSerialized] public static string[] ActorTypes = Array.Empty<string>();
     [NonSerialized] public static string[] ComparisonTypes = Array.Empty<string>();
+
+    [NonSerialized]
+    public Dictionary<int, string> ObjectTypeOptions = new Dictionary<int, string>
+    {
+        {0, "Any"},
+        {1, "NPC"},
+        {2, "Player"},
+        {3, "Event NPC"},
+        {4, "Event Object"}
+    };
+
+    [NonSerialized]
+    public Dictionary<int, string> HostileOptions = new Dictionary<int, string>
+    {
+        {0, "Any"},
+        {1, "Is Hostile"},
+        {2, "Not Hostile"}
+    };
+
+    [NonSerialized]
+    public Dictionary<int, string> InCombatOptions = new Dictionary<int, string>
+    {
+        {0, "Any"},
+        {1, "In Combat"},
+        {2, "Out of Combat"}
+    };
+
+    [NonSerialized]
+    public Dictionary<int, string> IsAliveOptions = new Dictionary<int, string>
+    {
+        {0, "Any"},
+        {1, "Is Alive"},
+        {2, "Is Dead"}
+    };
+
+    [NonSerialized]
+    public Dictionary<byte, string> HuntTargetRankOptions = new Dictionary<byte, string>
+    {
+        {0, "No Filter"},
+        {3, "S Rank"},
+        {2, "A Rank"},
+        {1, "B Rank"}
+    };
+
+    [NonSerialized]
+    public Dictionary<byte, string> RoleOptions = new Dictionary<byte, string>
+    {
+        {0, "Any"},
+        {1, "Tank"},
+        {4, "Healer"},
+        {2, "Melee DPS"},
+        {3, "Ranged DPS"}
+    };
+
+    [NonSerialized]
+    public Dictionary<byte, string> OnlineStatusOptions = new Dictionary<byte, string>
+    {
+        {0, "Any"},
+        {1, "New Adventurer"},
+        {2, "Returner"},
+        {3, "Mentor"},
+        {4, "PvE Mentor"},
+        {5, "PvP Mentor"},
+        {6, "Trade Mentor"},
+        {7, "Party Leader"},
+        {8, "Party Member"},
+        {9, "Party Member (Cross-world)"},
+        {10, "Away from Keyboard"},
+        {11, "Busy"},
+        {12, "Role-playing"},
+        {13, "Viewing Cutscene"},
+        {14, "Waiting for Duty Finder"},
+        {15, "Disconnected"},
+    };
+
     public static void Init()
     {
         ElementTypes = new string[]{
@@ -25,7 +100,7 @@ public class Element
         ActorTypes = new string[] {
             "Game object with specific data".Loc(),
             "Self".Loc(),
-            "Targeted enemy".Loc()
+            "Targeted character".Loc()
         };
         ComparisonTypes = new string[]{
             "Name (case-insensitive, partial)".Loc(),
@@ -122,6 +197,8 @@ public class Element
     [DefaultValue(0)] public int refActorBuffParam = 0;
     [DefaultValue(0f)] public float refActorBuffTimeMin = 0f;
     [DefaultValue(0f)] public float refActorBuffTimeMax = 0f;
+    [DefaultValue(false)] public bool refActorLowHp = false;
+    [DefaultValue(false)] public bool refActorLowMp = false;
     [DefaultValue(false)] public bool refActorObjectLife = false;
     [DefaultValue(0)] public float refActorLifetimeMin = 0;
     [DefaultValue(0)] public float refActorLifetimeMax = 0;
@@ -141,7 +218,7 @@ public class Element
     /// <summary>
     /// 0: Game object with specific name |
     /// 1: Self |
-    /// 2: Targeted enemy
+    /// 2: Targeted character
     /// </summary>
     [DefaultValue(0)] public int refActorType = 0;
     [DefaultValue(false)] public bool includeHitbox = false;
@@ -197,6 +274,15 @@ public class Element
     [DefaultValue(false)] public bool refActorUseTransformation = false;
     public List<string> refActorTetherConnectedWithPlayer = [];
     [DefaultValue(0)] public int refActorTransformationID = 0;
+    [DefaultValue(0)] public int refActorObjectType = 0;
+    [DefaultValue(0)] public int refActorHostile = 0;
+    [DefaultValue(0)] public int refActorInCombat = 0;
+    [DefaultValue(0)] public int refActorIsAlive = 0;
+    [DefaultValue(0)] public byte refActorHuntTargetRank = 0;
+    [DefaultValue(0)] public byte refActorRole = 0;
+    [DefaultValue(0)] public byte refActorOnlineStatus = 0;
+    [DefaultValue(false)] public bool excludeTarget = false;
+    [DefaultValue(false)] public bool excludeSelf = false;
     [DefaultValue(MechanicType.Unspecified)] public MechanicType mechanicType = MechanicType.Unspecified;
     [DefaultValue(false)] public bool refMark = false;
     [DefaultValue(0)] public int refMarkID = 0;

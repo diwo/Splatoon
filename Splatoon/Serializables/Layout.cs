@@ -24,6 +24,7 @@ public class Layout
     /// 3: Only in combat AND instance |
     /// 4: Only in combat OR instance |
     /// 5: Never
+    /// 6: Not in instance
     /// </summary>
     [DefaultValue(0)] public int DCond = 0;
     [Obsolete] public Dictionary<string, Element> Elements = new(); //never delete

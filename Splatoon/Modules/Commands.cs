@@ -106,6 +106,16 @@ class Commands : IDisposable
                     }
                 });
             }
+            else if (arguments.StartsWith("logger addall"))
+            {
+                var layout = CGui.getLoggerLayout();
+                layout.ElementsL.Clear();
+                foreach (var obj in Svc.Objects)
+                {
+                    CGui.AddElementByDataID(layout, obj.DataId, obj.Name.TextValue);
+                }
+                layout.Enabled = true;
+            }
         })
         {
             HelpMessage = """
