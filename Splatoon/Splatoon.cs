@@ -747,7 +747,12 @@ public unsafe class Splatoon : IDalamudPlugin
                 }
             }
             else if (e.refActorType == 2 && Svc.Targets.Target != null
-                && Svc.Targets.Target is IBattleNpc && CheckCharacterAttributes(e, Svc.Targets.Target, true))
+                && Svc.Targets.Target is IBattleChara
+                && CheckCharacterAttributes(e, Svc.Targets.Target, true)
+                && CheckActorObjectType(e, Svc.Targets.Target)
+                && CheckActorHostile(e, Svc.Targets.Target)
+                && CheckActorInCombat(e, Svc.Targets.Target)
+                && CheckActorRole(e, Svc.Targets.Target))
             {
                 if (i == null || !i.UseDistanceLimit || CheckDistanceCondition(i, Svc.Targets.Target.GetPositionXZY()))
                 {
@@ -781,6 +786,11 @@ public unsafe class Splatoon : IDalamudPlugin
                 {
                     var targetable = a.Struct()->GetIsTargetable();
                     if (IsAttributeMatches(e, a)
+                            && CheckActorObjectType(e, a)
+                            && CheckActorHostile(e, a)
+                            && CheckActorInCombat(e, a)
+                            && CheckActorRole(e, a)
+                            && (!e.excludeTarget || a.EntityId != Svc.Targets.Target?.EntityId)
                             && (!e.onlyTargetable || targetable)
                             && (!e.onlyUnTargetable || !targetable)
                             && CheckCharacterAttributes(e, a)
@@ -859,12 +869,44 @@ public unsafe class Splatoon : IDalamudPlugin
         return false;
     }
 
+    static bool CheckActorObjectType(Element e, IGameObject a)
+    {
+        if (e.refActorObjectType == 1 && !(a is IBattleNpc)) return false;
+        if (e.refActorObjectType == 2 && a.ObjectKind != ObjectKind.Player) return false;
+        return true;
+    }
+
+    static bool CheckActorHostile(Element e, IGameObject a)
+    {
+        if (!(a is IBattleChara)) return true;
+        if (e.refActorHostile == 1 && !((IBattleChara) a).IsHostile()) return false;
+        if (e.refActorHostile == 2 && ((IBattleChara) a).IsHostile()) return false;
+        return true;
+    }
+
+    static bool CheckActorInCombat(Element e, IGameObject a)
+    {
+        if (!(a is IBattleChara)) return true;
+        var isInCombat = ((IBattleChara) a).StatusFlags.HasFlag(StatusFlags.InCombat);
+        if (e.refActorInCombat == 1 && !isInCombat) return false;
+        if (e.refActorInCombat == 2 && isInCombat) return false;
+        return true;
+    }
+
+    static bool CheckActorRole(Element e, IGameObject a)
+    {
+        if (e.refActorRole == 0 || !(a is IBattleChara)) return true;
+        var role = ((IBattleChara) a).ClassJob.GameData.Role;
+        return e.refActorRole == role;
+    }
+
     static bool CheckCharacterAttributes(Element e, IGameObject a, bool ignoreVisibility = false)
     {
         return
             (ignoreVisibility || !e.onlyVisible || (a is ICharacter chr && chr.IsCharacterVisible()))
             && (!e.refActorRequireCast || (e.refActorCastId.Count > 0 && a is IBattleChara chr2 && IsCastingMatches(e, chr2) != e.refActorCastReverse))
             && (!e.refActorRequireBuff || (e.refActorBuffId.Count > 0 && a is IBattleChara chr3 && CheckEffect(e, chr3)))
+            && (!e.refActorLowMp || (a is IBattleChara chr6 && LowMp(chr6)))
             && (!e.refActorUseTransformation || (a is IBattleChara chr4 && CheckTransformationID(e, chr4)))
             && (!e.refMark || (a is IBattleChara chr5 && Marking.HaveMark(chr5, (uint)e.refMarkID)))
             && (!e.LimitRotation || (a.Rotation >= e.RotationMax && a.Rotation <= e.RotationMin));
@@ -932,6 +974,11 @@ public unsafe class Splatoon : IDalamudPlugin
                 return c.StatusList.Where(x => !e.refActorUseBuffParam || x.Param == e.refActorBuffParam).Select(x => x.StatusId).ContainsAny(e.refActorBuffId).Invert(e.refActorRequireBuffsInvert);
             }
         }
+    }
+
+    static bool LowMp(IBattleChara c)
+    {
+        return !c.IsDead && c.CurrentMp <= c.MaxMp / 2;
     }
 
     static bool IsObjectEffectMatches(Element e, IGameObject o, List<CachedObjectEffectInfo> info)

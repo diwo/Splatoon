@@ -13,6 +13,41 @@ public class Element
     public static string[] ElementTypes = Array.Empty<string>();
     [NonSerialized] public static string[] ActorTypes = Array.Empty<string>();
     [NonSerialized] public static string[] ComparisonTypes = Array.Empty<string>();
+
+    [NonSerialized]
+    public Dictionary<int, string> ObjectTypeOptions = new Dictionary<int, string>
+    {
+        {0, "Any"},
+        {1, "NPC"},
+        {2, "Player"}
+    };
+
+    [NonSerialized]
+    public Dictionary<int, string> HostileOptions = new Dictionary<int, string>
+    {
+        {0, "Any"},
+        {1, "Is Hostile"},
+        {2, "Not Hostile"}
+    };
+
+    [NonSerialized]
+    public Dictionary<int, string> InCombatOptions = new Dictionary<int, string>
+    {
+        {0, "Any"},
+        {1, "In Combat"},
+        {2, "Out of Combat"}
+    };
+
+    [NonSerialized]
+    public Dictionary<byte, string> RoleOptions = new Dictionary<byte, string>
+    {
+        {0, "Any"},
+        {1, "Tank"},
+        {4, "Healer"},
+        {2, "Melee DPS"},
+        {3, "Ranged DPS"}
+    };
+
     public static void Init()
     {
         ElementTypes = new string[]{
@@ -26,7 +61,7 @@ public class Element
         ActorTypes = new string[] {
             "Game object with specific data".Loc(),
             "Self".Loc(),
-            "Targeted enemy".Loc()
+            "Targeted character".Loc()
         };
         ComparisonTypes = new string[]{
             "Name (case-insensitive, partial)".Loc(),
@@ -117,6 +152,7 @@ public class Element
     [DefaultValue(0)] public int refActorBuffParam = 0;
     [DefaultValue(0f)] public float refActorBuffTimeMin = 0f;
     [DefaultValue(0f)] public float refActorBuffTimeMax = 0f;
+    [DefaultValue(false)] public bool refActorLowMp = false;
     [DefaultValue(false)] public bool refActorObjectLife = false;
     [DefaultValue(0)] public float refActorLifetimeMin = 0;
     [DefaultValue(0)] public float refActorLifetimeMax = 0;
@@ -135,7 +171,7 @@ public class Element
     /// <summary>
     /// 0: Game object with specific name |
     /// 1: Self |
-    /// 2: Targeted enemy
+    /// 2: Targeted character
     /// </summary>
     [DefaultValue(0)] public int refActorType = 0;
     [DefaultValue(false)] public bool includeHitbox = false;
@@ -182,6 +218,11 @@ public class Element
     [DefaultValue(false)] public bool refActorObjectEffectLastOnly = false;
     [DefaultValue(false)] public bool refActorUseTransformation = false;
     [DefaultValue(0)] public int refActorTransformationID = 0;
+    [DefaultValue(0)] public int refActorObjectType = 0;
+    [DefaultValue(0)] public int refActorHostile = 0;
+    [DefaultValue(0)] public int refActorInCombat = 0;
+    [DefaultValue(0)] public byte refActorRole = 0;
+    [DefaultValue(false)] public bool excludeTarget = false;
     [DefaultValue(MechanicType.Unspecified)] public MechanicType mechanicType = MechanicType.Unspecified;
     [Obsolete("Not used. Use mechanicType.")]
     [DefaultValue(false)] public bool Unsafe = false;
