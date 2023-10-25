@@ -385,6 +385,21 @@ unsafe partial class CGui
                     ImGui.EndCombo();
                 }
 
+                SImGuiEx.SizedText("Is Alive: ".Loc(), WidthElement);
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(100f);
+                if (ImGui.BeginCombo($"##IsAliveCombo{i + k}", el.IsAliveOptions[el.refActorIsAlive].Loc()))
+                {
+                    foreach (KeyValuePair<int, string> entry in el.IsAliveOptions)
+                    {
+                        if (ImGui.Selectable(entry.Value.Loc()))
+                        {
+                            el.refActorIsAlive = entry.Key;
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
+
                 SImGuiEx.SizedText("Role: ".Loc(), WidthElement);
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(100f);

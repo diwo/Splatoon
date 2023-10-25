@@ -752,6 +752,7 @@ public unsafe class Splatoon : IDalamudPlugin
                 && CheckActorObjectType(e, Svc.Targets.Target)
                 && CheckActorHostile(e, Svc.Targets.Target)
                 && CheckActorInCombat(e, Svc.Targets.Target)
+                && CheckActorIsAlive(e, Svc.Targets.Target)
                 && CheckActorRole(e, Svc.Targets.Target))
             {
                 if (i == null || !i.UseDistanceLimit || CheckDistanceCondition(i, Svc.Targets.Target.GetPositionXZY()))
@@ -789,6 +790,7 @@ public unsafe class Splatoon : IDalamudPlugin
                             && CheckActorObjectType(e, a)
                             && CheckActorHostile(e, a)
                             && CheckActorInCombat(e, a)
+                            && CheckActorIsAlive(e, a)
                             && CheckActorRole(e, a)
                             && (!e.excludeTarget || a.EntityId != Svc.Targets.Target?.EntityId)
                             && (!e.onlyTargetable || targetable)
@@ -890,6 +892,15 @@ public unsafe class Splatoon : IDalamudPlugin
         var isInCombat = ((IBattleChara) a).StatusFlags.HasFlag(StatusFlags.InCombat);
         if (e.refActorInCombat == 1 && !isInCombat) return false;
         if (e.refActorInCombat == 2 && isInCombat) return false;
+        return true;
+    }
+
+    static bool CheckActorIsAlive(Element e, IGameObject a)
+    {
+        if (!(a is IBattleChara)) return true;
+        var isAlive = ((IBattleChara) a).CurrentHp > 0;
+        if (e.refActorIsAlive == 1 && !isAlive) return false;
+        if (e.refActorIsAlive == 2 && isAlive) return false;
         return true;
     }
 

@@ -39,6 +39,14 @@ public class Element
     };
 
     [NonSerialized]
+    public Dictionary<int, string> IsAliveOptions = new Dictionary<int, string>
+    {
+        {0, "Any"},
+        {1, "Is Alive"},
+        {2, "Is Dead"}
+    };
+
+    [NonSerialized]
     public Dictionary<byte, string> RoleOptions = new Dictionary<byte, string>
     {
         {0, "Any"},
@@ -221,6 +229,7 @@ public class Element
     [DefaultValue(0)] public int refActorObjectType = 0;
     [DefaultValue(0)] public int refActorHostile = 0;
     [DefaultValue(0)] public int refActorInCombat = 0;
+    [DefaultValue(0)] public int refActorIsAlive = 0;
     [DefaultValue(0)] public byte refActorRole = 0;
     [DefaultValue(false)] public bool excludeTarget = false;
     [DefaultValue(MechanicType.Unspecified)] public MechanicType mechanicType = MechanicType.Unspecified;
