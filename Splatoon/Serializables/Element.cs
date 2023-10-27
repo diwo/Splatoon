@@ -47,6 +47,15 @@ public class Element
     };
 
     [NonSerialized]
+    public Dictionary<byte, string> HuntTargetRankOptions = new Dictionary<byte, string>
+    {
+        {0, "No Filter"},
+        {3, "S Rank"},
+        {2, "A Rank"},
+        {1, "B Rank"}
+    };
+
+    [NonSerialized]
     public Dictionary<byte, string> RoleOptions = new Dictionary<byte, string>
     {
         {0, "Any"},
@@ -230,6 +239,7 @@ public class Element
     [DefaultValue(0)] public int refActorHostile = 0;
     [DefaultValue(0)] public int refActorInCombat = 0;
     [DefaultValue(0)] public int refActorIsAlive = 0;
+    [DefaultValue(0)] public byte refActorHuntTargetRank = 0;
     [DefaultValue(0)] public byte refActorRole = 0;
     [DefaultValue(false)] public bool excludeTarget = false;
     [DefaultValue(MechanicType.Unspecified)] public MechanicType mechanicType = MechanicType.Unspecified;
