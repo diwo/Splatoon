@@ -388,6 +388,21 @@ unsafe partial class CGui
                     ImGui.EndCombo();
                 }
 
+                SImGuiEx.SizedText("Hunt Target Rank: ".Loc(), WidthElement);
+                ImGui.SameLine();
+                ImGui.SetNextItemWidth(100f);
+                if (ImGui.BeginCombo($"##HuntTargetRankCombo{i + k}", el.HuntTargetRankOptions[el.refActorHuntTargetRank].Loc()))
+                {
+                    foreach (KeyValuePair<byte, string> entry in el.HuntTargetRankOptions)
+                    {
+                        if (ImGui.Selectable(entry.Value.Loc()))
+                        {
+                            el.refActorHuntTargetRank = entry.Key;
+                        }
+                    }
+                    ImGui.EndCombo();
+                }
+
                 SImGuiEx.SizedText("Role: ".Loc(), WidthElement);
                 ImGui.SameLine();
                 ImGui.SetNextItemWidth(100f);

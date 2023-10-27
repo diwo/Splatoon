@@ -90,6 +90,7 @@ public unsafe class Splatoon : IDalamudPlugin
     internal HttpClient HttpClient;
     internal PinnedElementEdit PinnedElementEditWindow;
     internal RenderableZoneSelector RenderableZoneSelector;
+    private Dictionary<uint, byte> HuntTargetToRank = new();
 
     internal void Load(DalamudPluginInterface pluginInterface)
     {
@@ -167,6 +168,7 @@ public unsafe class Splatoon : IDalamudPlugin
             }
         }
         NameNpcIDs = NameNpcIDs.Where(x => x.Value != 0).ToDictionary(x => x.Key, x => x.Value);
+        SetupHuntTargets();
         StreamDetector.Start();
         AttachedInfo.Init();
         Logger.OnTerritoryChanged();
@@ -201,6 +203,13 @@ public unsafe class Splatoon : IDalamudPlugin
         EzConfigGui.WindowSystem.AddWindow(RenderableZoneSelector);
         Init = true;
         SplatoonIPC.Init();
+    }
+
+    private void SetupHuntTargets()
+    {
+        foreach (var monster in Svc.Data.GetExcelSheet<NotoriousMonster>()) {
+            HuntTargetToRank[monster.BNpcBase.Value.RowId] = monster.Rank;
+        }
     }
 
     public void Dispose()
@@ -750,6 +759,7 @@ public unsafe class Splatoon : IDalamudPlugin
                 && CheckActorHostile(e, Svc.Targets.Target)
                 && CheckActorInCombat(e, Svc.Targets.Target)
                 && CheckActorIsAlive(e, Svc.Targets.Target)
+                && CheckActorHuntTargetRank(e, Svc.Targets.Target)
                 && CheckActorRole(e, Svc.Targets.Target))
             {
                 if (i == null || !i.UseDistanceLimit || CheckDistanceCondition(i, Svc.Targets.Target.GetPositionXZY()))
@@ -801,6 +811,7 @@ public unsafe class Splatoon : IDalamudPlugin
                             && CheckActorHostile(e, a)
                             && CheckActorInCombat(e, a)
                             && CheckActorIsAlive(e, a)
+                            && CheckActorHuntTargetRank(e, a)
                             && CheckActorRole(e, a)
                             && (!e.excludeTarget || a.ObjectId != Svc.Targets.Target?.ObjectId)
                             && (!e.onlyTargetable || targetable)
@@ -1003,6 +1014,14 @@ public unsafe class Splatoon : IDalamudPlugin
         if (e.refActorIsAlive == 1 && !isAlive) return false;
         if (e.refActorIsAlive == 2 && isAlive) return false;
         return true;
+    }
+
+    bool CheckActorHuntTargetRank(Element e, GameObject a)
+    {
+        if (e.refActorHuntTargetRank == 0) return true;
+        if (!(a is BattleNpc)) return false;
+        if (!HuntTargetToRank.TryGetValue(((BattleNpc)a).DataId, out var rank)) return false;
+        return rank == e.refActorHuntTargetRank;
     }
 
     static bool CheckActorRole(Element e, GameObject a)
