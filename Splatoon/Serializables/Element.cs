@@ -19,7 +19,9 @@ public class Element
     {
         {0, "Any"},
         {1, "NPC"},
-        {2, "Player"}
+        {2, "Player"},
+        {3, "Event NPC"},
+        {4, "Event Object"}
     };
 
     [NonSerialized]

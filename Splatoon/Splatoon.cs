@@ -886,6 +886,8 @@ public unsafe class Splatoon : IDalamudPlugin
     {
         if (e.refActorObjectType == 1 && !(a is IBattleNpc)) return false;
         if (e.refActorObjectType == 2 && a.ObjectKind != ObjectKind.Player) return false;
+        if (e.refActorObjectType == 3 && a.ObjectKind != ObjectKind.EventNpc) return false;
+        if (e.refActorObjectType == 4 && a.ObjectKind != ObjectKind.EventObj) return false;
         return true;
     }
 
