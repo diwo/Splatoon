@@ -1269,7 +1269,8 @@ public unsafe class Splatoon : IDalamudPlugin
                     .Replace("\\n", "\n")
                     .Replace("$VFXID", $"{(go is Character chr4 ? chr4.GetStatusVFXId() : 0).Format()}")
                     .Replace("$TRANSFORM", $"{(go is Character chr5 ? chr5.GetTransformationID() : 0).Format()}")
-                    .Replace("$MSTATUS", $"{(*(int*)(go.Address + 0x104)).Format()}");
+                    .Replace("$MSTATUS", $"{(*(int*)(go.Address + 0x104)).Format()}")
+                    .Replace("$CLASSJOB", $"{(go is Character chrx ? chrx.ClassJob.GameData.Abbreviation : "")}");
             }
             displayObjects.Add(new DisplayObjectText(cx, cy, z + e.offZ + e.overlayVOffset, text, e.overlayBGColor, e.overlayTextColor, e.overlayFScale));
         }
