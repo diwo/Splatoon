@@ -66,4 +66,37 @@ internal partial class CGui
             }
         }
     }
+
+    public static Layout getLoggerLayout()
+    {
+        var layoutName = "Logger Output";
+        var layout = P.Config.LayoutsL.FindLast(l => l.Name == layoutName);
+        if (layout == null)
+        {
+            layout = new Layout() { Name = layoutName };
+            P.Config.LayoutsL.Add(layout);
+        }
+        return layout;
+    }
+
+    public static void AddElementByDataID(Layout layout, uint dataID, string name)
+    {
+        if (dataID == 0) return;
+
+        var prettyName = $"{dataID:X}" + (name != "" ? (" " + name) : "");
+        if (!layout.ElementsL.Any(e => e.Name == prettyName))
+        {
+            var element = new Element(1) {
+                Name = prettyName,
+                refActorComparisonType = 3,
+                refActorDataID = dataID,
+                onlyVisible = true,
+                tether = true,
+                color = 0x400000ff,
+                thicc = 5.0f,
+                overlayText = prettyName
+            };
+            layout.ElementsL.Add(element);
+        }
+    }
 }
