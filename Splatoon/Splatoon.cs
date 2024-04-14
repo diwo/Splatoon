@@ -796,8 +796,7 @@ public unsafe class Splatoon : IDalamudPlugin
                 foreach (var a in Svc.Objects)
                 {
                     var targetable = a.Struct()->GetIsTargetable();
-                    if (IsAttributeMatches(e, a)
-                            && CheckActorObjectType(e, a)
+                    if (CheckActorObjectType(e, a)
                             && CheckActorHostile(e, a)
                             && CheckActorInCombat(e, a)
                             && CheckActorIsAlive(e, a)
@@ -809,7 +808,8 @@ public unsafe class Splatoon : IDalamudPlugin
                             && CheckCharacterAttributes(e, a)
                             && (!e.refTargetYou || CheckTargetingOption(e, a))
                             && (!e.refActorObjectLife || a.GetLifeTimeSeconds().InRange(e.refActorLifetimeMin, e.refActorLifetimeMax))
-                            && (!e.LimitDistance || Vector3.Distance(a.GetPositionXZY(), new(e.DistanceSourceX, e.DistanceSourceY, e.DistanceSourceZ)).InRange(e.DistanceMin, e.DistanceMax).Invert(e.LimitDistanceInvert)))
+                            && (!e.LimitDistance || Vector3.Distance(a.GetPositionXZY(), new(e.DistanceSourceX, e.DistanceSourceY, e.DistanceSourceZ)).InRange(e.DistanceMin, e.DistanceMax).Invert(e.LimitDistanceInvert))
+                            && IsAttributeMatches(e, a))
                     {
                         if (i == null || !i.UseDistanceLimit || CheckDistanceCondition(i, a.GetPositionXZY()))
                         {
@@ -1061,7 +1061,9 @@ public unsafe class Splatoon : IDalamudPlugin
 
     static bool IsNameMatches(Element e, IGameObject o)
     {
-        return !string.IsNullOrEmpty(e.refActorNameIntl.Get(e.refActorName)) && (e.refActorNameIntl.Get(e.refActorName) == "*" || o.Name.ToString().ContainsIgnoreCase(e.refActorNameIntl.Get(e.refActorName)));
+        if (string.IsNullOrEmpty(e.refActorNameIntl.Get(e.refActorName))) return false;
+        if (e.refActorNameIntl.Get(e.refActorName) == "*") return true;
+        return o.Name.ToString().ContainsIgnoreCase(e.refActorNameIntl.Get(e.refActorName));
     }
 
     static nint ResolvePlaceholder(string ph)
