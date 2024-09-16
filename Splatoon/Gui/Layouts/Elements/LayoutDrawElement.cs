@@ -632,6 +632,9 @@ internal unsafe partial class CGui
                 ImGui.Checkbox((el.refActorRequireBuffsInvert ? "Require ANY status to be missing".Loc() + "##" : "Require ALL listed statuses to be present".Loc() + "##") + i + k, ref el.refActorRequireAllBuffs);
                 ImGui.SameLine();
                 ImGui.Checkbox("Invert behavior".Loc() + "##" + i + k, ref el.refActorRequireBuffsInvert);
+                ImGuiUtils.SizedText("", WidthElement);
+                ImGui.SameLine();
+                ImGui.Checkbox("Only match status originated from self".Loc(), ref el.refActorOnlyOwnBuff);
             }
 
             ImGuiUtils.SizedText("Low HP:".Loc(), WidthElement);

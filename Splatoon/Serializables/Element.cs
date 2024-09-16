@@ -194,6 +194,7 @@ public class Element
     [DefaultValue(false)] public bool refActorRequireBuffsInvert = false;
     [DefaultValue(false)] public bool refActorUseBuffTime = false;
     [DefaultValue(false)] public bool refActorUseBuffParam = false;
+    [DefaultValue(false)] public bool refActorOnlyOwnBuff = false;
     [DefaultValue(0)] public int refActorBuffParam = 0;
     [DefaultValue(0f)] public float refActorBuffTimeMin = 0f;
     [DefaultValue(0f)] public float refActorBuffTimeMax = 0f;
